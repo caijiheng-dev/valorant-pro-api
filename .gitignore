@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# 虚拟环境
+.venv/
+venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# 环境变量与本地配置
+.env
+*.local
+
+# 数据库本地文件
+*.db
+*.sqlite
+
+# 系统
+.DS_Store
+Thumbs.db
