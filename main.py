@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routers import news,user
+from routers import user, player
 from fastapi.middleware.cors import CORSMiddleware
 
 from utils.register_exception_handlers import register_exception_handlers
@@ -22,6 +22,5 @@ async def root():
     return {"message": "Hello World"}
 
 #挂载/注册路由
-app.include_router(news.router)
+app.include_router(player.router)
 app.include_router(user.router)
-
