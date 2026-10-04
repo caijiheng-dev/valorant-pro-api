@@ -1,14 +1,14 @@
 import datetime
-import uuid
 
 from fastapi import HTTPException
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.user import User, UserToken
-from schemas.user import UserRequest, UserUpdateRequest, UserChangePasswordRequest
+from schemas.user import UserRequest, UserUpdateRequest
 from utils import password_security
 from utils.password_security import get_hash_pwd
+from utils.auth import create_access_token
 
 
 #根据用户名查询数据库
@@ -28,23 +28,8 @@ async def create_user(db:AsyncSession,user_data:UserRequest):
     return user
 
 #生成token
-
-async def create_token(db:AsyncSession,user_id: str):
-    #生成token->设置过期时间->查询数据库当前用户是否有token->有：更新，没有：添加
-    token = str(uuid.uuid4())
-    expires_at = datetime.datetime.now() + datetime.timedelta(hours=24)
-    query = select(UserToken).where(UserToken.user_id == user_id)
-    result = await db.execute(query)
-    user_token = result.scalar_one_or_none()
-
-    if user_token:
-        user_token.token = token
-        user_token.expires_at = expires_at
-    else:
-        user_token = UserToken(user_id=user_id, token=token,expires_at=expires_at)
-        db.add(user_token)
-    await db.commit()
-    return token
+async def create_token(db, user_id: int) -> str:
+    return create_access_token({"sub": str(user_id)})
 
 #验证用户和密码
 async def authenticate_user(db:AsyncSession,username:str,password:str):
@@ -65,6 +50,12 @@ async def get_user_by_token(db:AsyncSession,token:str):
         return None
 
     query = select(User).where(User.id == db_token.user_id)
+    result = await db.execute(query)
+    return result.scalar_one_or_none()
+
+#按id查用户
+async def get_user_by_id(db: AsyncSession, user_id: int):
+    query = select(User).where(User.id == user_id)
     result = await db.execute(query)
     return result.scalar_one_or_none()
 
